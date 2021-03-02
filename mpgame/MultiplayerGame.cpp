@@ -78,6 +78,7 @@ idMultiplayerGame::idMultiplayerGame() {
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
 	buyMenu = NULL;
+	invMenu = NULL;
 // RITUAL END
 	scoreBoard = NULL;
 	statSummary = NULL;
@@ -153,6 +154,7 @@ void idMultiplayerGame::Reset() {
 	buyMenu = uiManager->FindGui( "guis/buymenu.gui", true, false, true );
 	buyMenu->SetStateString( "field_credits", "$0.00");
 	buyMenu->SetStateBool( "gameDraw", true );
+	invMenu = uiManager->FindGui("guis/inventory.gui", true, false, true);
 // RITUAL END
 	PACIFIER_UPDATE;
 	scoreBoard = uiManager->FindGui( "guis/scoreboard.gui", true, false, true );
@@ -4007,10 +4009,15 @@ void idMultiplayerGame::DisableMenu( void ) {
 		statSummary->Activate( false, gameLocal.time );
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
-	} else if( currentMenu == 4 ) {
-		buyMenu->Activate( false, gameLocal.time );
-// RITUAL END
 	}
+	else if (currentMenu == 4) {
+		buyMenu->Activate(false, gameLocal.time);
+	}
+	else if (currentMenu == 5)
+		{
+		invMenu->Activate(false, gameLocal.time);
+		}
+// RITUAL END
 
 	// copy over name from temp cvar
 	if( currentMenu == 1 && idStr::Cmp( cvarSystem->GetCVarString( "gui_ui_name" ), cvarSystem->GetCVarString( "ui_name" ) ) ) {
@@ -4130,7 +4137,12 @@ const char* idMultiplayerGame::HandleGuiCommands( const char *_menuCommand ) {
 // jmartel: make sure var is initialized (compiler complained)
 	} else if( currentMenu == 3 ) {
 		currentGui = statSummary;
-	} else {
+	} 
+	else if (currentMenu == 5)
+	{
+		currentGui = invMenu;
+	}
+	else {
 		gameLocal.Warning( "idMultiplayerGame::HandleGuiCommands() - Unknown current menu '%d'\n", currentMenu );
 		currentGui = mainGui;
 	}
@@ -9135,6 +9147,20 @@ void idMultiplayerGame::OpenLocalBuyMenu( void )
 
 	gameLocal.sessionCommand = "game_startmenu";
 	gameLocal.mpGame.nextMenu = 4;
+}
+void idMultiplayerGame::OpenLocalInvMenu(void)
+{
+	// Buy menu work in progress
+	//if ( gameLocal.mpGame.GetCurrentMenu() == 4 )
+	//{	
+	//		return;
+	//}
+
+	if (currentMenu == 5)
+		return; // Already open
+
+	gameLocal.sessionCommand = "game_startmenu";
+	gameLocal.mpGame.nextMenu = 5;
 }
 
 /*	

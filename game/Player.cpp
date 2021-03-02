@@ -205,6 +205,10 @@ void idInventory::Clear( void ) {
 	powerups			= 0;
 	armor				= 0;
 	maxarmor			= 0;
+	baseAttack			= 0;
+	baseAccuracy		= 0;
+	baseDefense			= 0;
+	baseSpeed			= 0;
 	secretAreasDiscovered = 0;
 
 	memset( ammo, 0, sizeof( ammo ) );
@@ -339,6 +343,9 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 	maxHealth		= dict.GetInt( "maxhealth", "100" );
 	armor			= dict.GetInt( "armor", "50" );
 	maxarmor		= dict.GetInt( "maxarmor", "100" );
+	baseAttack		= dict.GetInt("baseAttack", "20");
+	baseDefense		= dict.GetInt("baseDefense", "20");
+	baseSpeed		= dict.GetInt("baseSpeed", "20");
 
 	// ammo
 	for( i = 0; i < MAX_AMMOTYPES; i++ ) {
@@ -404,6 +411,10 @@ void idInventory::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( powerups );
 	savefile->WriteInt( armor );
 	savefile->WriteInt( maxarmor );
+	savefile->WriteInt( baseAttack );
+	savefile->WriteInt( baseDefense );
+	savefile->WriteInt( baseSpeed );
+	savefile->WriteInt( baseAccuracy );
 
 	for( i = 0; i < MAX_AMMO; i++ ) {
 		savefile->WriteInt( ammo[ i ] );
