@@ -1656,7 +1656,9 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 	// end our looping ambient sound
 	StopSound( SND_CHANNEL_AMBIENT, false );
 
-	if ( attacker && attacker->IsType( idActor::GetClassType() ) ) {
+	if ( attacker && attacker->IsType( idActor::GetClassType() ) ) 
+	{
+		gameLocal.GetLocalPlayer()->inventory.exp += 5;
 		gameLocal.AlertAI( ( idActor * )attacker );
 		aiManager.AnnounceKill ( this, attacker, inflictor );
 		aiManager.AnnounceDeath ( this, attacker );

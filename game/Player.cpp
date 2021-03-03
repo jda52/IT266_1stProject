@@ -348,6 +348,7 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 	baseAttack		= dict.GetInt("baseAttack", "20");
 	baseDefense		= dict.GetInt("baseDefense", "20");
 	baseSpeed		= dict.GetInt("baseSpeed", "20");
+	level = dict.GetInt("level", "1");
 
 	// ammo
 	for( i = 0; i < MAX_AMMOTYPES; i++ ) {
@@ -3421,13 +3422,19 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->HandleNamedEvent ( "updateArmor" );
 	}
 	temp = _hud->State().GetInt("player_exp", "-1");
-	if (temp != exp)
+	if (temp != inventory.exp)
 	{
-		if (exp > 60)
+		if (inventory.exp > 60)
 		{
-			exp = 0;
+			inventory.level++;
+			inventory.exp = 0;
 		}
-		_hud->SetStateInt("player_exp", exp);
+		_hud->SetStateInt("player_exp", inventory.exp);
+	}
+	temp = _hud->State().GetInt("player_level", "-1");
+	if (temp != inventory.level)
+	{
+		_hud->SetStateInt("player_level", inventory.level);
 	}
 	// Boss bar
 	if ( _hud->State().GetInt ( "boss_health", "-1" ) != (bossEnemy ? bossEnemy->health : -1) ) {
