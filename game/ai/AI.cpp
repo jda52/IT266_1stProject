@@ -1536,7 +1536,6 @@ idAI::Pain
 bool idAI::Pain( idEntity *inflictor, idEntity *attacker, int damage, const idVec3 &dir, int location ) {
 	aifl.pain   = idActor::Pain( inflictor, attacker, damage, dir, location );
 	aifl.damage = true;
-
 	// force a blink
 	blink_time = 0;
 
@@ -1556,7 +1555,6 @@ bool idAI::Pain( idEntity *inflictor, idEntity *attacker, int damage, const idVe
 	if ( attacker != this ) {
 		// React to taking pain
 		ReactToPain ( attacker, damage );
-
 		pain.takenThisFrame += damage;
 		pain.lastTakenTime = gameLocal.time;
 		combat.tacticalPainTaken += damage;
@@ -1660,11 +1658,9 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 
 	if ( attacker && attacker->IsType( idActor::GetClassType() ) ) {
 		gameLocal.AlertAI( ( idActor * )attacker );
-
 		aiManager.AnnounceKill ( this, attacker, inflictor );
 		aiManager.AnnounceDeath ( this, attacker );
    	}
-
 	if ( attacker && attacker->IsType( idActor::GetClassType() ) ) {
 		gameLocal.AlertAI( ( idActor * )attacker );
 	}
@@ -3679,7 +3675,7 @@ void idAI::OnDeath( void ){
 		// Fixme!  Is this safe to do immediately?
 		vehicleController.Eject();
 	}
-
+	
 	aiManager.RemoveTeammate ( this );
 
 	ExecScriptFunction( funcs.death );
