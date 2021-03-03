@@ -205,7 +205,13 @@ void idInventory::Clear( void ) {
 	powerups			= 0;
 	armor				= 0;
 	maxarmor			= 0;
+	baseAttack			= 0;
+	baseAccuracy		= 0;
+	baseDefense			= 0;
+	baseSpeed			= 0;
 	secretAreasDiscovered = 0;
+	level				= 0;
+	exp					= 0;
 
 	memset( ammo, 0, sizeof( ammo ) );
 
@@ -339,6 +345,9 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 	maxHealth		= dict.GetInt( "maxhealth", "100" );
 	armor			= dict.GetInt( "armor", "50" );
 	maxarmor		= dict.GetInt( "maxarmor", "100" );
+	baseAttack		= dict.GetInt("baseAttack", "20");
+	baseDefense		= dict.GetInt("baseDefense", "20");
+	baseSpeed		= dict.GetInt("baseSpeed", "20");
 
 	// ammo
 	for( i = 0; i < MAX_AMMOTYPES; i++ ) {
@@ -404,6 +413,10 @@ void idInventory::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( powerups );
 	savefile->WriteInt( armor );
 	savefile->WriteInt( maxarmor );
+	savefile->WriteInt( baseAttack );
+	savefile->WriteInt( baseDefense );
+	savefile->WriteInt( baseSpeed );
+	savefile->WriteInt( baseAccuracy );
 
 	for( i = 0; i < MAX_AMMO; i++ ) {
 		savefile->WriteInt( ammo[ i ] );
@@ -3407,7 +3420,15 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateFloat	( "player_armorpct", idMath::ClampFloat ( 0.0f, 1.0f, (float)inventory.armor / (float)inventory.maxarmor ) );
 		_hud->HandleNamedEvent ( "updateArmor" );
 	}
-	
+	temp = _hud->State().GetInt("player_exp", "-1");
+	if (temp != exp)
+	{
+		if (exp > 60)
+		{
+			exp = 0;
+		}
+		_hud->SetStateInt("player_exp", exp);
+	}
 	// Boss bar
 	if ( _hud->State().GetInt ( "boss_health", "-1" ) != (bossEnemy ? bossEnemy->health : -1) ) {
 		if ( !bossEnemy || bossEnemy->health <= 0 ) {
@@ -3964,7 +3985,7 @@ idPlayer::FireWeapon
 void idPlayer::FireWeapon( void ) {
 	idMat3 axis;
 	idVec3 muzzle;
-
+	
 //RITUAL BEGIN
 	if( gameLocal.GetIsFrozen() && gameLocal.gameType == GAME_DEADZONE )
 	{
@@ -6108,7 +6129,8 @@ void idPlayer::Weapon_Combat( void ) {
 	// check for attack
 	pfl.weaponFired = false;
  	if ( !influenceActive ) {
- 		if ( ( usercmd.buttons & BUTTON_ATTACK ) && !weaponGone ) {
+ 		if ( ( usercmd.buttons & BUTTON_ATTACK ) && !weaponGone ) 
+		{
  			FireWeapon();
  		} else if ( oldButtons & BUTTON_ATTACK ) {
  			pfl.attackHeld = false;

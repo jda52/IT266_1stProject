@@ -660,6 +660,7 @@ public:
 	bool			isBuyingAllowedRightNow;
 
 	void			OpenLocalBuyMenu( void );
+	void			OpenLocalInvMenu( void );
 	void			RedrawLocalBuyMenu( void );
 	void			GiveCashToTeam( int team, float cashAmount );
 	bool			IsBuyingAllowedInTheCurrentGameMode( void );
@@ -712,6 +713,7 @@ private:
 	//int				sqRoundNumber;			// round number in DeadZone; match expires when this equals "sq_numRoundsPerMatch" (cvar)
 // squirrel: Mode-agnostic buymenus
 	idUserInterface *buyMenu;				// buy menu
+
 // RITUAL END
 	idUserInterface *scoreBoard;			// scoreboard
 	idUserInterface *mainGui;				// ready / nick / votes etc.

@@ -410,7 +410,6 @@ stateResult_t rvWeaponBlaster::State_Fire ( const stateParms_t& parms ) {
 			//don't fire if we're targeting a gui.
 			idPlayer* player;
 			player = gameLocal.GetLocalPlayer();
-
 			//make sure the player isn't looking at a gui first
 			if( player && player->GuiActive() )	{
 				fireHeldTime = 0;

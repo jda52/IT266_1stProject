@@ -196,6 +196,12 @@ class idInventory {
 public:
 	int						maxHealth;
 	int						weapons;
+	int						baseAttack;
+	int						baseDefense;
+	int						baseSpeed;
+	int						baseAccuracy;
+	int						level;
+	int						exp;
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
 	int						carryOverWeapons;

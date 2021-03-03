@@ -486,7 +486,7 @@ void idProjectile::Launch( const idVec3 &start, const idVec3 &dir, const idVec3 
 	}
 
  	UpdateVisuals();
-
+	
 	// Make sure these come after update visuals so the origin and axis are correct
 	PlayEffect( "fx_launch", renderEntity.origin, renderEntity.axis );
 	
