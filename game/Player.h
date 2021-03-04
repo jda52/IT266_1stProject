@@ -199,7 +199,6 @@ public:
 	int						baseAttack;
 	int						baseDefense;
 	int						baseSpeed;
-	int						baseAccuracy;
 	int						level;
 	int						exp;
 // RITUAL BEGIN
