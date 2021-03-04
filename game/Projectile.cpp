@@ -342,7 +342,7 @@ void idProjectile::Launch( const idVec3 &start, const idVec3 &dir, const idVec3 
  	} 
 
 	// Set the damage
-	damagePower = dmgPower;
+	damagePower = dmgPower * gameLocal.GetLocalPlayer()->inventory.baseAttack;
 
 	if ( !spawnArgs.GetFloat( "speed", "0", temp ) ) {
 		spawnArgs.GetVector( "velocity", "0 0 0", tmp );

@@ -206,7 +206,6 @@ void idInventory::Clear( void ) {
 	armor				= 0;
 	maxarmor			= 0;
 	baseAttack			= 0;
-	baseAccuracy		= 0;
 	baseDefense			= 0;
 	baseSpeed			= 0;
 	secretAreasDiscovered = 0;
@@ -345,10 +344,11 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 	maxHealth		= dict.GetInt( "maxhealth", "100" );
 	armor			= dict.GetInt( "armor", "50" );
 	maxarmor		= dict.GetInt( "maxarmor", "100" );
-	baseAttack		= dict.GetInt("baseAttack", "20");
-	baseDefense		= dict.GetInt("baseDefense", "20");
-	baseSpeed		= dict.GetInt("baseSpeed", "20");
+	baseAttack		= dict.GetInt("baseAttack", "1");
+	baseDefense		= dict.GetInt("baseDefense", "1");
+	baseSpeed		= dict.GetInt("baseSpeed", "1");
 	level = dict.GetInt("level", "1");
+	level = dict.GetInt("level", "0");
 
 	// ammo
 	for( i = 0; i < MAX_AMMOTYPES; i++ ) {
@@ -417,7 +417,6 @@ void idInventory::Save( idSaveGame *savefile ) const {
 	savefile->WriteInt( baseAttack );
 	savefile->WriteInt( baseDefense );
 	savefile->WriteInt( baseSpeed );
-	savefile->WriteInt( baseAccuracy );
 
 	for( i = 0; i < MAX_AMMO; i++ ) {
 		savefile->WriteInt( ammo[ i ] );
@@ -3424,12 +3423,33 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 	temp = _hud->State().GetInt("player_exp", "-1");
 	if (temp != inventory.exp)
 	{
-		if (inventory.exp > 60)
+		if (inventory.exp > 10)
 		{
 			inventory.level++;
+			inventory.baseAttack++;
+			inventory.baseDefense++;
+			inventory.baseSpeed++;
 			inventory.exp = 0;
 		}
 		_hud->SetStateInt("player_exp", inventory.exp);
+	}
+	temp = _hud->State().GetInt("player_attack", "-1");
+	if (temp != inventory.baseAttack)
+	{
+	
+		_hud->SetStateInt("player_attack", inventory.baseAttack);
+	}
+	temp = _hud->State().GetInt("player_def", "-1");
+	if (temp != inventory.baseDefense)
+	{
+
+		_hud->SetStateInt("player_def", inventory.baseDefense);
+	}
+	temp = _hud->State().GetInt("player_spe", "-1");
+	if (temp != inventory.baseDefense)
+	{
+
+		_hud->SetStateInt("player_spe", inventory.baseSpeed);
 	}
 	temp = _hud->State().GetInt("player_level", "-1");
 	if (temp != inventory.level)
@@ -8787,7 +8807,7 @@ void idPlayer::AdjustSpeed( void ) {
 		speed *= 0.33f;
 	}
 
-	physicsObj.SetSpeed( speed, pm_crouchspeed.GetFloat() );
+	physicsObj.SetSpeed(speed, pm_crouchspeed.GetFloat());
 }
 
 /*
@@ -10048,7 +10068,7 @@ void idPlayer::CalcDamagePoints( idEntity *inflictor, idEntity *attacker, const 
  		if ( !damage ) {
  			armorSave = 0;
  		} else if ( armorSave >= damage ) {
- 			armorSave = damage - 1;
+			armorSave = (damage - 1) * gameLocal.GetLocalPlayer()->inventory.baseDefense;
  			damage = 1;
  		} else {
  			damage -= armorSave;
