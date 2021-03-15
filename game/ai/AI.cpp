@@ -1607,7 +1607,8 @@ bool idAI::Pain( idEntity *inflictor, idEntity *attacker, int damage, const idVe
 idAI::Killed
 =====================
 */
-void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const idVec3 &dir, int location ) {
+void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const idVec3 &dir, int location ) 
+{
 	idAngles			ang;
 	const char*			modelDeath;
 	const idKeyValue*	kv;
@@ -1678,7 +1679,7 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 	CheckDeathObjectives();
 
 	ClearEnemy();
-
+	SpawnItem();
 	// make monster nonsolid
 	physicsObj.SetContents( 0 );
 	physicsObj.GetClipModel()->Unlink();
@@ -1732,7 +1733,8 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 	SetState ( "State_Killed" );
 
 	kv = spawnArgs.MatchPrefix( "def_drops", NULL );
-	while( kv ) {
+	while( kv ) 
+	{
 		idDict args;
 		idEntity *tEnt;
 		if( kv->GetValue() != "" ){
@@ -1752,7 +1754,23 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 		kv = spawnArgs.MatchPrefix( "def_drops", kv );
 	}
 }
+void idAI::SpawnItem()
+{
+	idDict dict;
+	idVec3		org;
+	idPlayer	*player;
 
+
+	player = gameLocal.GetLocalPlayer();
+
+	dict.Set("classname", "item_armor_shard");
+
+	org = physicsObj.GetOrigin();
+	dict.Set("origin", org.ToString());
+
+	idEntity *newEnt = NULL;
+	gameLocal.SpawnEntityDef(dict, &newEnt);
+}
 /***********************************************************************
 
 	Targeting/Combat

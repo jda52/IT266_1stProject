@@ -745,7 +745,7 @@ public:
 	void					UpdateEnemy						( void );
 	void					UpdateEnemyPosition				( bool force = true );
 	void					UpdateEnemyVisibility			( void );
-
+	void					SpawnItem(void);
 	// Attack direction
 	bool					GetAimDir						( const idVec3& source, const idEntity* aimAtEnt, const idDict* projectileDict, idEntity *ignore, idVec3 &aimDir, float aimOffset, float predict ) const;
 	void					GetPredictedAimDirOffset		( const idVec3& source, const idVec3& target, float projectileSpeed, const idVec3& targetVelocity, idVec3& offset ) const;
