@@ -6627,7 +6627,7 @@ bool idPlayer::Collide( const trace_t &collision, const idVec3 &velocity ) {
 	{
 		return false;
 	}
-	if ( other->IsType(idAI::GetClassType()))
+	if ( other->IsType(idAI::GetClassType()) && !inBattle)
 	{
 		idAI* enemyAI = static_cast<idAI*>(other);
 		opponent = enemyAI;
