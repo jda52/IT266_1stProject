@@ -2886,7 +2886,7 @@ bool idAI::AttackMelee ( const char *attackName, const idDict* meleeDict ) {
 		}
 		return false;
 	}
-
+	
 	//
 	// do the damage
 	//
@@ -2939,7 +2939,8 @@ bool idAI::AttackMelee ( const char *attackName, const idDict* meleeDict ) {
 			}
 		}
 	}
-
+	canAttack = false;
+	gameLocal.GetLocalPlayer()->canAttack = true;
 	lastAttackTime = gameLocal.time;
 
 	return true;
