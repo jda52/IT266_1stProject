@@ -1150,6 +1150,7 @@ idPlayer::idPlayer() {
 	spectator				= 0;
 	forcedReady				= false;
 	wantSpectate			= false;
+	canAttack				= false;
 
 	lastHitToggle			= false;
 	lastArmorHit			= false;
@@ -1270,6 +1271,11 @@ idPlayer::idPlayer() {
  	teleportEntity			= NULL;
 	teleportKiller			= -1;
 	lastKiller				= NULL;
+	inBattle				= false;
+	battleSpace				= vec3_zero;
+	battleAng				= ang_zero;
+	lastLocation			= vec3_zero;
+	lastAngle				= ang_zero;
 
  	respawning				= false;
  	ready					= false;
@@ -1706,6 +1712,7 @@ void idPlayer::Init( void ) {
 	objectiveUp			= false;
  	teleportEntity		= NULL;
 	lastKiller			= NULL;
+	opponent			= NULL;
 	teleportKiller		= -1;
  	leader				= false;
 
@@ -2798,6 +2805,8 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	idVec3 spec_origin;
 
 	assert( !gameLocal.isClient );
+	battleSpace = spawn_origin;
+	battleAng = spawn_angles;
 
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
@@ -4035,9 +4044,11 @@ void idPlayer::FireWeapon( void ) {
 		bool noFireWhileSwitching = false;
 		noFireWhileSwitching = ( gameLocal.isMultiplayer && idealWeapon != currentWeapon && weapon->NoFireWhileSwitching() );
 		if ( !noFireWhileSwitching ) {
-			if ( weapon->AmmoInClip() || weapon->AmmoAvailable() ) {
+			if ( (weapon->AmmoInClip() || weapon->AmmoAvailable()) && canAttack == true) {
 				pfl.attackHeld = true;
 				weapon->BeginAttack();
+				canAttack = false;
+				opponent->canAttack = true;
 			} else {
 				pfl.attackHeld = false;
 				pfl.weaponFired = false;
@@ -6612,10 +6623,22 @@ bool idPlayer::Collide( const trace_t &collision, const idVec3 &velocity ) {
 	other = gameLocal.entities[ collision.c.entityNum ];
 
 	// allow client-side prediction of item collisions for simple client effects
-	if ( gameLocal.isClient && !other->IsType( idItem::GetClassType() ) ) {
+	if ( gameLocal.isClient && !other->IsType( idItem::GetClassType() ) ) 
+	{
 		return false;
 	}
-
+	if ( other->IsType(idAI::GetClassType()))
+	{
+		idAI* enemyAI = static_cast<idAI*>(other);
+		opponent = enemyAI;
+		inBattle = true;
+		lastLocation = GetPhysics()->GetOrigin();
+		opponent->lastPosition = opponent->GetPhysics()->GetOrigin();
+		lastAngle = battleAng;
+		this->Teleport(battleSpace, battleAng, NULL);
+		other->Teleport(this->GetPhysics()->GetOrigin() + idVec3(-200, -40, 1), battleAng, NULL);
+		canAttack = true;
+	}
 
 	if ( other ) {
 		other->Signal( SIG_TOUCH );

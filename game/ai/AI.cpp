@@ -65,6 +65,7 @@ idAI::idAI ( void ) {
 
 	fl.neverDormant			= false;		// AI's can go dormant
 
+	inBattle				= false;
 	allowEyeFocus			= true;
 	disablePain				= false;
 	allowJointMod			= true;
@@ -72,6 +73,8 @@ idAI::idAI ( void ) {
 	focusTime				= 0;
 	alignHeadTime			= 0;
 	forceAlignHeadTime		= 0;
+	lastPosition			= vec3_zero;
+	canAttack				= false;
 
 	orientationJoint		= INVALID_JOINT;
 
@@ -1486,18 +1489,40 @@ int idAI::ReactionTo( const idEntity *ent ) {
 	}
 
 	const idActor *actor = static_cast<const idActor *>( ent );
-	if ( actor->IsType( idPlayer::GetClassType() ) && static_cast<const idPlayer *>(actor)->noclip ) {
+	if ( actor->IsType( idPlayer::GetClassType() ) && static_cast<const idPlayer *>(actor)->noclip ) 
+	{
 		// ignore players in noclip mode
 		return ATTACK_IGNORE;
 	}
 
 	// actors on different teams will always fight each other
-	if ( actor->team != team ) {
-		if ( actor->fl.notarget ) {
+	if ( actor->team != team ) 
+	{
+		if (actor->fl.notarget && actor->IsType(idPlayer::GetClassType()) == false)
+		{
 			// don't attack on sight when attacker is notargeted
 			return ATTACK_ON_DAMAGE; /* | ATTACK_ON_ACTIVATE ; */
 		}
-		return ATTACK_ON_SIGHT | ATTACK_ON_DAMAGE; /* | ATTACK_ON_ACTIVATE; */
+		if (actor->IsType(idPlayer::GetClassType()))
+		{
+			idPlayer *player = gameLocal.GetLocalPlayer();
+			if (!player->inBattle)
+			{
+				Event_BecomePassive(true);
+				return ATTACK_IGNORE;
+			}
+			else
+			{
+				gameLocal.Printf("test");
+				Event_BecomeAggressive();
+				SetEnemy(player);
+				return ATTACK_ON_SIGHT | ATTACK_ON_DAMAGE;
+			}
+		}
+		else
+		{
+			return ATTACK_ON_SIGHT | ATTACK_ON_DAMAGE; /* | ATTACK_ON_ACTIVATE; */
+		}
 	}
 
 	//FIXME: temporarily disabled monsters of same rank fighting because it's happening too much.
@@ -1538,7 +1563,10 @@ bool idAI::Pain( idEntity *inflictor, idEntity *attacker, int damage, const idVe
 	aifl.damage = true;
 	// force a blink
 	blink_time = 0;
-
+	SetEnemy(gameLocal.GetLocalPlayer());
+	combat.fl.ignoreEnemies = false;
+	combat.fl.aware = true;
+	canAttack = true;
 	// No special handling if friendly fire
 	// jshepard: friendly fire will cause pain. Players will only be able to pain buddy marines
 	// via splash damage.
@@ -1657,13 +1685,7 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 	// end our looping ambient sound
 	StopSound( SND_CHANNEL_AMBIENT, false );
 
-	if ( attacker && attacker->IsType( idActor::GetClassType() ) ) 
-	{
-		gameLocal.GetLocalPlayer()->inventory.exp += 5;
-		gameLocal.AlertAI( ( idActor * )attacker );
-		aiManager.AnnounceKill ( this, attacker, inflictor );
-		aiManager.AnnounceDeath ( this, attacker );
-   	}
+	
 	if ( attacker && attacker->IsType( idActor::GetClassType() ) ) {
 		gameLocal.AlertAI( ( idActor * )attacker );
 	}
@@ -1680,6 +1702,19 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 
 	ClearEnemy();
 	SpawnItem();
+	if (attacker && attacker->IsType(idActor::GetClassType()))
+	{
+		if (gameLocal.GetLocalPlayer()->inBattle)
+		{
+			idPlayer *player = gameLocal.GetLocalPlayer();
+			player->inBattle = false;
+			player->Teleport(player->lastLocation, player->lastAngle, NULL);
+		}
+		gameLocal.GetLocalPlayer()->inventory.exp += 5;
+		gameLocal.AlertAI((idActor *)attacker);
+		aiManager.AnnounceKill(this, attacker, inflictor);
+		aiManager.AnnounceDeath(this, attacker);
+	}
 	// make monster nonsolid
 	physicsObj.SetContents( 0 );
 	physicsObj.GetClipModel()->Unlink();
@@ -1765,9 +1800,15 @@ void idAI::SpawnItem()
 
 	dict.Set("classname", "item_armor_shard");
 
-	org = physicsObj.GetOrigin();
+	if (!player->inBattle )
+	{
+		org = physicsObj.GetOrigin();
+	}
+	else
+	{
+		org = lastPosition;
+	}
 	dict.Set("origin", org.ToString());
-
 	idEntity *newEnt = NULL;
 	gameLocal.SpawnEntityDef(dict, &newEnt);
 }
@@ -2490,12 +2531,21 @@ bool idAI::Attack ( const char* attackName, jointHandle_t joint, idEntity* targe
 	}
 
 	// Melee Attack?
-	if ( spawnArgs.GetBool ( va("attack_%s_melee", attackName ), "0" ) ) {
+	if ( spawnArgs.GetBool ( va("attack_%s_melee", attackName ), "0" ) && gameLocal.GetLocalPlayer() -> canAttack == false && canAttack == true) 
+	{
+		canAttack = false;
+		gameLocal.GetLocalPlayer()->canAttack = true;
 		return AttackMelee ( attackName, attackDict );
 	}
-
+	else if (gameLocal.GetLocalPlayer()->canAttack == false && canAttack == true)
+	{
+		canAttack = false;
+		gameLocal.GetLocalPlayer()->canAttack = true;
+		return (AttackRanged(attackName, attackDict, joint, target, pushVelocity) != NULL);
+	}
 	// Ranged attack (hitscan or projectile)?
-	return ( AttackRanged ( attackName, attackDict, joint, target, pushVelocity ) != NULL );
+	return false;
+	//return ( AttackRanged ( attackName, attackDict, joint, target, pushVelocity ) != NULL );
 }
 
 /*
@@ -3414,7 +3464,10 @@ void idAI::OnTouch( idEntity *other, trace_t *trace ) {
 	aifl.pushed = true;
 	
 	// If pushed by the player update tactical
-	if ( pusher && pusher->IsType ( idPlayer::GetClassType() ) && (combat.tacticalMaskAvailable & AITACTICAL_MOVE_PLAYERPUSH_BIT) ) {
+	if ( pusher && pusher->IsType ( idPlayer::GetClassType() ) && (combat.tacticalMaskAvailable & AITACTICAL_MOVE_PLAYERPUSH_BIT) && gameLocal.GetLocalPlayer() -> inBattle) 
+	{
+		SetEnemy(gameLocal.GetLocalPlayer());
+		Event_BecomeAggressive();
 		ForceTacticalUpdate ( );
 	}		
 }
@@ -4291,7 +4344,7 @@ bool idAI::CheckForTeammateEnemy( void ) {
 	idEntity*	teammateEnemy;
 
 	// Not looking for a new enemy.
-	if ( combat.fl.ignoreEnemies ) {
+	if ( combat.fl.ignoreEnemies || inBattle == false) {
 		return false;
 	}
 	
