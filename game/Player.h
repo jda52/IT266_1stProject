@@ -360,6 +360,11 @@ public:
 	int						nextAmmoRegenPulse[ MAX_AMMO ];	// time when ammo will regenerate
 	int						nextArmorPulse;		// time when armor will tick down
 	bool					hiddenWeapon;		// if the weapon is hidden ( in noWeapons maps )
+	bool					inBattle;
+	idVec3					battleSpace;
+	idVec3					lastLocation;
+	idAngles				battleAng;
+	idAngles				lastAngle;
 
 	// mp stuff
 	int						spectator;
@@ -379,6 +384,7 @@ public:
 	bool					lastHitToggle;
 	bool					lastArmorHit;
 	bool					forcedReady;
+	bool					canAttack;
 	int						lastArenaChange;
 	
 	bool					wantSpectate;			// from userInfo
@@ -398,7 +404,7 @@ public:
 	int						teleportKiller;			// entity number of an entity killing us at teleporter exit
 
 	idEntityPtr<idPlayer>	lastKiller;
-
+	idEntityPtr<idAI>	opponent;
 	// timers
 	int						minRespawnTime;			// can respawn when time > this, force after g_forcerespawn
 	int						maxRespawnTime;			// force respawn after this time

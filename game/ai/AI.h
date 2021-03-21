@@ -522,6 +522,9 @@ public:
 	int						focusAlignTime;
 	int						focusTime;
 	idVec3					currentFocusPos;
+	bool					inBattle;
+	bool					canAttack;
+	idVec3					lastPosition;
 
 	// Looking
 	bool					allowJointMod;
