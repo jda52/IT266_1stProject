@@ -4044,7 +4044,7 @@ void idPlayer::FireWeapon( void ) {
 		bool noFireWhileSwitching = false;
 		noFireWhileSwitching = ( gameLocal.isMultiplayer && idealWeapon != currentWeapon && weapon->NoFireWhileSwitching() );
 		if ( !noFireWhileSwitching ) {
-			if ( (weapon->AmmoInClip() || weapon->AmmoAvailable()) && canAttack == true) {
+			if ( (weapon->AmmoInClip() || weapon->AmmoAvailable()) && canAttack == true && inBattle == true) {
 				pfl.attackHeld = true;
 				weapon->BeginAttack();
 				canAttack = false;

@@ -1797,8 +1797,45 @@ void idAI::SpawnItem()
 
 
 	player = gameLocal.GetLocalPlayer();
-
-	dict.Set("classname", "item_armor_shard");
+	const char* droppedItem = "";
+	int rng = rand() % 199 + 1;
+	if (rng >= 1 && rng <= 50)
+	{
+		droppedItem = "item_armor_shard";
+	}
+	else if (rng >= 51 && rng <= 100)
+	{
+		droppedItem = "item_health_small";
+	}
+	else if(rng >= 101 && rng <= 125)
+	{
+		droppedItem = "item_armor_small";
+	}
+	else if (rng >= 126 && rng <= 150)
+	{
+		droppedItem = "item_health_large";
+	}
+	else if (rng >= 151 && rng <= 160)
+	{
+		droppedItem = "weapon_shotgun";
+	}
+	else if (rng >= 161 && rng <= 170)
+	{
+		droppedItem = "weapon_nailgun";
+	}
+	else if (rng >= 171 && rng <= 180)
+	{
+		droppedItem = "weapon_grenadelauncher";
+	}
+	else if (rng >= 181 && rng <= 190)
+	{
+		droppedItem = "weapon_lightninggun";
+	}
+	else
+	{
+		droppedItem = "weapon_napalmgun";
+	}
+	dict.Set("classname", droppedItem);
 
 	if (!player->inBattle )
 	{
@@ -1810,6 +1847,7 @@ void idAI::SpawnItem()
 	}
 	dict.Set("origin", org.ToString());
 	idEntity *newEnt = NULL;
+	player->hud->SetStateString("pickup", droppedItem);
 	gameLocal.SpawnEntityDef(dict, &newEnt);
 }
 /***********************************************************************
