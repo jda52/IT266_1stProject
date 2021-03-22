@@ -1718,7 +1718,12 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 	// make monster nonsolid
 	physicsObj.SetContents( 0 );
 	physicsObj.GetClipModel()->Unlink();
-
+	if (gameLocal.GetLocalPlayer()->inBattle)
+	{
+		idPlayer *player = gameLocal.GetLocalPlayer();
+		player->inBattle = false;
+		player->Teleport(player->lastLocation, player->lastAngle, NULL);
+	}
 	Unbind();
 	if ( g_perfTest_aiNoRagdoll.GetBool() ) {
 		if ( spawnArgs.MatchPrefix( "lipsync_death" ) ) {

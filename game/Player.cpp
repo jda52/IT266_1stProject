@@ -4053,7 +4053,6 @@ void idPlayer::FireWeapon( void ) {
 				pfl.attackHeld = false;
 				pfl.weaponFired = false;
 				StopFiring();
-				NextBestWeapon();
 			}
 		} else {
 			StopFiring();
@@ -6627,7 +6626,8 @@ bool idPlayer::Collide( const trace_t &collision, const idVec3 &velocity ) {
 	{
 		return false;
 	}
-	if ( other->IsType(idAI::GetClassType()) && !inBattle)
+	const idActor *actor = static_cast<const idActor *>(other);
+	if (other->IsType(idAI::GetClassType()) && !inBattle && actor ->team != team)
 	{
 		idAI* enemyAI = static_cast<idAI*>(other);
 		opponent = enemyAI;
