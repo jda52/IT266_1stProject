@@ -3446,7 +3446,7 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateInt("player_def", inventory.baseDefense);
 	}
 	temp = _hud->State().GetInt("player_spe", "-1");
-	if (temp != inventory.baseDefense)
+	if (temp != inventory.baseSpeed)
 	{
 
 		_hud->SetStateInt("player_spe", inventory.baseSpeed);

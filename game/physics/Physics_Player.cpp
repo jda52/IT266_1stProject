@@ -1816,7 +1816,7 @@ idPhysics_Player::SetSpeed
 ================
 */
 void idPhysics_Player::SetSpeed( const float newWalkSpeed, const float newCrouchSpeed ) {
-	walkSpeed = newWalkSpeed + gameLocal.GetLocalPlayer()->inventory.baseSpeed/2;
+	walkSpeed = newWalkSpeed + (gameLocal.GetLocalPlayer()->inventory.baseSpeed * 0.8);
 	crouchSpeed = newCrouchSpeed;
 }
 
